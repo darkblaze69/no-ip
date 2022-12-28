@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 USER=""
 PASSWORD=""
 HOSTNAME=""
@@ -8,6 +8,9 @@ IP=""
 RESULT=""
 INTERVAL=0
 CONFIG=""
+USERAGENT="'no-ip shell script/1.0 mail@mail.com'"
+NOIPURL="https://dynupdate.no-ip.com/nic/update"
+URL_DETECTIP="https://myexternalip.com/raw"
 DEBUG="${DEBUG:-0}"
 
 if [[ "${DEBUG}" == "1" ]]; then
@@ -113,7 +116,7 @@ fi
 
 if [ -n "$DETECTIP" ]
 then
-	IP=$(wget -qO- "http://myexternalip.com/raw")
+	IP=$(wget -qO- "${URL_DETECTIP}")
 fi
 
 
@@ -128,12 +131,6 @@ then
 	echo "Interval is not an integer."
 	exit 35
 fi
-
-
-USERAGENT="--user-agent 'no-ip shell script/1.0 mail@mail.com'"
-BASE64AUTH=$(echo "$USER:$PASSWORD" | base64)
-AUTHHEADER="--header 'Authorization: Basic ${BASE64AUTH}'"
-NOIPURL="https://dynupdate.no-ip.com/nic/update"
 
 if [ -n "$IP" ] || [ -n "$HOSTNAME" ]
 then
@@ -157,7 +154,7 @@ fi
 
 while :
 do
-	CMD="curl --location ${USERAGENT} ${AUTHHEADER} --request GET '${NOIPURL}'"
+	CMD="wget -qO- -U ${USERAGENT} --user ${USER} --password ${PASSWORD} '${NOIPURL}'"
 	if [[ "${DEBUG}" == "1" ]]; then
 		echo "${CMD}"
 	fi
